@@ -35,16 +35,10 @@
         <!-- endbuild -->
 
         <script type="text/javascript">
-            var userNameInput = document.getElementById('username');
-            var passwordInput = document.getElementById('password');
-
             function onLoginClick() {
-                var username = userNameInput.value;
-                var password = passwordInput.value;
-
                 var loginObject = {
-                    userName: username,
-                    password: password
+                    userName: getInputValue('username'),
+                    password: getInputValue('password')
                 };
 
                 console.log(loginObject);
