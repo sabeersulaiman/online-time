@@ -1,10 +1,11 @@
 using System;
+using System.Collections.Generic;
 
 namespace api.Models
 {
     public class User
     {
-        public int UserId { get; set; }
+        public long UserId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Position { get; set; }
@@ -15,5 +16,8 @@ namespace api.Models
         public string PasswordKey { get; set; }
         public DateTime DateAdded { get; set; }
         public DateTime DateModified { get; set; }
+
+        public List<UserRole> UserRoles { get; set; }
+        public string Token { get; set; }
     }
 }

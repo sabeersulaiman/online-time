@@ -1,3 +1,4 @@
+using System;
 using api.Models;
 using api.Models.Incoming;
 using api.Services;
@@ -19,8 +20,13 @@ namespace api.Controllers
         [HttpPost("login")]
         public Response<User> Login([FromBody]UserLogin loginData)
         {
-            var loggedInUser = _userService.Login(loginData.UserName, loginData.Password);
-            return Response<User>.SuccessResponse(loggedInUser);
+            try {
+                var loggedInUser = _userService.Login(loginData.Email, loginData.Password);
+                return Response<User>.SuccessResponse(loggedInUser);
+            }
+            catch(Exception e) {
+                return Response<User>.ErrorResponse(e.Message);
+            }
         }
     }
 }
