@@ -25,9 +25,20 @@ namespace api
 
         public IConfiguration Configuration { get; }
 
+        readonly string CorsDefaultPolicy = "_corsDefaultPolicy";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(
+                options =>
+                {
+                    options.AddPolicy(
+                        CorsDefaultPolicy,
+                        builder => { builder.WithOrigins("*").WithMethods("*").WithHeaders("*"); }
+                    );
+                }
+            );
             services.Configure<TimeTrackConfig>(Configuration);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddTransient<IUserService, UserService>();
@@ -52,6 +63,7 @@ namespace api
                 app.UseHsts();
             }
 
+            app.UseCors(CorsDefaultPolicy);
             app.UseHttpsRedirection();
             app.UseMvc();
         }
