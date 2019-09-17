@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.Linq;
 using api.Config;
 using api.Models;
@@ -26,7 +27,7 @@ namespace api.Repositories
             }
         }
 
-        private void SaveUserRoles(User user)
+        private void SaveUserRoles(User user, IDbConnection connection, IDbTransaction transaction)
         {
             var addSql = @"
                 INSERT INTO userroles(userId, roleName, dateAdded, dateModified)
@@ -36,28 +37,15 @@ namespace api.Repositories
 
             var remSql = "DELETE FROM userroles WHERE userId = @UserId";
 
-            using (var connection = _connectionManager.GetNew())
+            connection.Execute(remSql, user, transaction);
+            foreach (var role in user.UserRoles)
             {
-                using (var transaction = connection.BeginTransaction())
-                {
-                    try
-                    {
-                        connection.Execute(remSql, user, transaction);
-                        foreach (var role in user.UserRoles)
-                        {
-                            role.UserId = user.UserId;
-                            var ids = connection.Query<long>(addSql, role, transaction);
-                            role.UserRoleId = ids.First();
-                        }
+                role.DateAdded = DateTime.UtcNow;
+                role.DateModified = DateTime.UtcNow;
 
-                        transaction.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        transaction.Rollback();
-                        throw new Exception(e.Message);
-                    }
-                }
+                role.UserId = user.UserId;
+                var ids = connection.Query<long>(addSql, role, transaction);
+                role.UserRoleId = ids.First();
             }
         }
 
@@ -71,7 +59,7 @@ namespace api.Repositories
             {
                 var users = connection.Query<User>(sql, new { email = email });
                 var user = users.FirstOrDefault();
-                if(user != null) LoadUserRoles(user);
+                if (user != null) LoadUserRoles(user);
 
                 return user;
             }
@@ -90,8 +78,23 @@ namespace api.Repositories
 
             using (var connection = _connectionManager.GetNew())
             {
-                var ids = connection.Query<long>(sql, user);
-                user.UserId = ids.First();
+                if (connection.State != ConnectionState.Open) connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        var ids = connection.Query<long>(sql, user, transaction);
+                        user.UserId = ids.First();
+
+                        SaveUserRoles(user, connection, transaction);
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                        throw new Exception(e.Message);
+                    }
+                }
             }
         }
     }

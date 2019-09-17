@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace api.Models
 {
@@ -12,7 +13,9 @@ namespace api.Models
         public string ProfilePicture { get; set; }
         public string MobileNumber { get; set; }
         public string EmailId { get; set; }
+        [JsonIgnore]
         public string PasswordHash { get; set; }
+        [JsonIgnore]
         public string PasswordKey { get; set; }
         public DateTime DateAdded { get; set; }
         public DateTime DateModified { get; set; }
