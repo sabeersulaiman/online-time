@@ -1,10 +1,11 @@
+using System.Threading.Tasks;
 using api.Models;
 
 namespace api.Repositories
 {
     public interface IUserRepository
     {
-        User FindUserByEmail(string email);
-        void SaveUser(User user);
+        Task<User> FindUserByEmail(string email);
+        Task SaveUser(User user);
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using api.Config;
 using api.Models;
 using Dapper;
@@ -17,17 +18,17 @@ namespace api.Repositories
             _connectionManager = new ConnectionManager(optionsMonitor.CurrentValue);
         }
 
-        private void LoadUserRoles(User user)
+        private async Task LoadUserRoles(User user)
         {
             var sql = "SELECT * FROM userroles WHERE userId = @UserId";
 
             using (var connection = _connectionManager.GetNew())
             {
-                user.UserRoles = connection.Query<UserRole>(sql, user).ToList();
+                user.UserRoles = (await connection.QueryAsync<UserRole>(sql, user)).ToList();
             }
         }
 
-        private void SaveUserRoles(User user, IDbConnection connection, IDbTransaction transaction)
+        private async Task SaveUserRoles(User user, IDbConnection connection, IDbTransaction transaction)
         {
             var addSql = @"
                 INSERT INTO userroles(userId, roleName, dateAdded, dateModified)
@@ -44,12 +45,12 @@ namespace api.Repositories
                 role.DateModified = DateTime.UtcNow;
 
                 role.UserId = user.UserId;
-                var ids = connection.Query<long>(addSql, role, transaction);
+                var ids = await connection.QueryAsync<long>(addSql, role, transaction);
                 role.UserRoleId = ids.First();
             }
         }
 
-        public User FindUserByEmail(string email)
+        public async Task<User> FindUserByEmail(string email)
         {
             var sql = @"
                 SELECT * FROM users WHERE emailId = @email;
@@ -57,15 +58,15 @@ namespace api.Repositories
 
             using (var connection = _connectionManager.GetNew())
             {
-                var users = connection.Query<User>(sql, new { email = email });
+                var users = await connection.QueryAsync<User>(sql, new { email = email });
                 var user = users.FirstOrDefault();
-                if (user != null) LoadUserRoles(user);
+                if (user != null) await LoadUserRoles(user);
 
                 return user;
             }
         }
 
-        public void SaveUser(User user)
+        public async Task SaveUser(User user)
         {
             var sql = @"
                 INSERT INTO users(firstName, lastName, position, profilePicture, mobileNumber, emailId, passwordHash, passwordKey, dateAdded, dateModified)
@@ -83,10 +84,10 @@ namespace api.Repositories
                 {
                     try
                     {
-                        var ids = connection.Query<long>(sql, user, transaction);
+                        var ids = await connection.QueryAsync<long>(sql, user, transaction);
                         user.UserId = ids.First();
 
-                        SaveUserRoles(user, connection, transaction);
+                        await SaveUserRoles(user, connection, transaction);
                         transaction.Commit();
                     }
                     catch (Exception e)

@@ -19,7 +19,26 @@ function post(request, data, authenticated) {
         };
 
         xhr.onerror = function() {
-            reject(this.responseText);
+            var stat = {
+                status: false,
+                message: 'Failed to process the request, please try again.'
+            };
+            reject(stat);
+        };
+
+        xhr.onloadend = function() {
+            if (this.status >= 200 && this.status < 300) {
+                return;
+            } else {
+                var stat = {
+                    status: false,
+                    message:
+                        'Failed to process the request, please try again. Status Code: ( ' +
+                        this.statusText +
+                        ' )'
+                };
+                reject(stat);
+            }
         };
 
         try {
@@ -36,11 +55,11 @@ function login(user) {
 }
 
 function isLoggedIn() {
-    if(__onlineUser) {
+    if (__onlineUser) {
         return true;
     } else {
         var localUser = localStorage.getItem(_userStoreKey);
-        if(localUser) {
+        if (localUser) {
             login(JSON.parse(localUser));
             return true;
         } else {
@@ -50,16 +69,16 @@ function isLoggedIn() {
 }
 
 function checkLogin() {
-    if(isLoggedIn()) {
+    if (isLoggedIn()) {
         return;
     } else {
-        location.href = "/index.html";
+        location.href = '/index.html';
     }
 }
 
 function loginRedirect() {
-    if(isLoggedIn()) {
-        location.href = "/home.html";
+    if (isLoggedIn()) {
+        location.href = '/home.html';
     } else {
         return;
     }

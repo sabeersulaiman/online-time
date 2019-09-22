@@ -25,6 +25,36 @@ button {
 
 // ============ Common Styles ================
 
+.error-online-track {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    display: flex;
+    background: rgba(0,0,0,.7);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transform: translateX(-50%);
+    width: 90%;
+    justify-content: space-between;
+    max-width: 300px;
+    .msg {
+        margin-right: 8px;
+        p {
+            margin: 0;
+            margin-top: 2px;
+        }
+    }
+    .closer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        i {
+            cursor: pointer;
+        }
+    }
+}
+
 .frm-ctrl {
     margin-bottom: 0.5em;
     label {
@@ -50,6 +80,7 @@ button.primary {
     font-size: 1.2em;
     border-radius: 3px;
     margin-top: 0.4em;
+    cursor: pointer;
 }
 
 // ============ End Common Styles ==============

@@ -1,11 +1,12 @@
+using System.Threading.Tasks;
 using api.Models;
 
 namespace api.Services
 {
     public interface IUserService
     {
-        User Login(string email, string password);
-        void SignUp(User user);
-        bool EnsureAdminUser(string email);
+        Task<User> Login(string email, string password);
+        Task SignUp(User user);
+        Task<bool> EnsureAdminUser(string email);
     }
 }

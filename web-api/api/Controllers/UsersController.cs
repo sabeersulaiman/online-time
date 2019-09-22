@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using api.Models;
 using api.Models.Incoming;
 using api.Services;
@@ -18,10 +19,10 @@ namespace api.Controllers
         }
 
         [HttpPost("login")]
-        public Response<User> Login([FromBody]UserLogin loginData)
+        public async Task<Response<User>> Login([FromBody]UserLogin loginData)
         {
             try {
-                var loggedInUser = _userService.Login(loginData.Email, loginData.Password);
+                var loggedInUser = await _userService.Login(loginData.Email, loginData.Password);
                 return Response<User>.SuccessResponse(loggedInUser);
             }
             catch(Exception e) {

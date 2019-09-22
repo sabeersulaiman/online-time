@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using api.Config;
 using api.Models;
 using api.Repositories;
@@ -70,10 +71,10 @@ namespace api.Services
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
-        public User Login(string email, string password)
+        public async Task<User> Login(string email, string password)
         {
             // find the user from db with the same email
-            var user = _userRepository.FindUserByEmail(email);
+            var user = await _userRepository.FindUserByEmail(email);
 
             if (user == null)
             {
@@ -96,7 +97,7 @@ namespace api.Services
             }
         }
 
-        public void SignUp(User user)
+        public async Task SignUp(User user)
         {
             // validate the roles
             foreach (UserRole role in user.UserRoles)
@@ -119,15 +120,15 @@ namespace api.Services
             user.PasswordHash = GenerateHash(user.PasswordHash, user.PasswordKey);
 
             // otherwise, save the user to db
-            _userRepository.SaveUser(user);
+            await _userRepository.SaveUser(user);
 
             // token generation
             GenerateUserToken(user);
         }
 
-        public bool EnsureAdminUser(string email)
+        public async Task<bool> EnsureAdminUser(string email)
         {
-            var emailUser = _userRepository.FindUserByEmail(email);
+            var emailUser = await _userRepository.FindUserByEmail(email);
             if (emailUser == null)
             {
                 var user = new User();
@@ -139,7 +140,7 @@ namespace api.Services
                     new UserRole() {RoleName = nameof(UserRoles.User)}
                 };
 
-                SignUp(user);
+                await SignUp(user);
                 return true;
             }
             else

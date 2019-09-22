@@ -7,6 +7,10 @@
             href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,400,700&display=swap"
             rel="stylesheet"
         />
+        <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet"
+        />
 
         <!-- build:css css/main.min.css -->
         <link rel="stylesheet" href="css/main.css" />
@@ -51,15 +55,18 @@
 
                 post('users/login', loginObject, false)
                     .then(function(r) {
-                        if(r.status) {
+                        if (r.status) {
                             login(r.data);
                             loginRedirect();
                         } else {
                             // handle error cases
+                            showOnlineTrackError(r.message);
                         }
                     })
                     .catch(function(e) {
-                        console.error(e, "Extra data");
+                        if (e && e.message) {
+                            showOnlineTrackError(e.message);
+                        }
                     });
             }
         </script>
